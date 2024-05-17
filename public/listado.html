@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Listado de Productos</title>
+</head>
+<body>
+  <h1>Listado de Productos</h1>
+  <div id="productos"></div>
+  <script>
+    var xmlhttp = new XMLHttpRequest();
+    xmlhttp.open("GET", "/xml/productos.xml", false);
+    xmlhttp.send();
+    var xmlDoc = xmlhttp.responseXML;
+
+    var xsltProcessor = new XSLTProcessor();
+    var xhttp = new XMLHttpRequest();
+    xhttp.open("GET", "/xml/productos.xsl", false);
+    xhttp.send();
+    var xslDoc = xhttp.responseXML;
+    xsltProcessor.importStylesheet(xslDoc);
+
+    var resultDocument = xsltProcessor.transformToFragment(xmlDoc, document);
+    document.getElementById("productos").appendChild(resultDocument);
+  </script>
+</body>
+</html>
