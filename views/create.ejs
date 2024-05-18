@@ -3,20 +3,26 @@
 <head>
   <meta charset="UTF-8">
   <title>Crear Producto</title>
-  <link rel="stylesheet" href="/style.css">
 </head>
-<body>
-  <h1>Crear Nuevo Producto</h1>
-  <form action="/products" method="POST">
-    <label for="name">Nombre:</label>
-    <input type="text" id="name" name="name" required>
-    <label for="price">Precio:</label>
-    <input type="number" id="price" name="price" required>
-    <label for="category">Categoría:</label>
-    <input type="text" id="category" name="category" required>
-    <label for="stock">Stock:</label>
-    <input type="number" id="stock" name="stock" required>
-    <button type="submit">Crear</button>
-  </form>
+<body style="font-family: Arial, sans-serif; background-color: #f4f4f9; margin: 0; padding: 20px; display: flex; justify-content: center; align-items: center; height: 100vh;">
+  <div style="background: #fff; padding: 20px; border-radius: 10px; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); max-width: 400px; width: 100%;">
+    <h1 style="text-align: center; color: #333;">Crear Nuevo Producto</h1>
+    <form action="/products" method="POST">
+      <label for="name" style="display: block; margin-bottom: 8px; color: #333;">Nombre:</label>
+      <input type="text" id="name" name="name" required style="width: calc(100% - 20px); padding: 10px; margin-bottom: 15px; border: 1px solid #ccc; border-radius: 5px; font-size: 16px;">
+      
+      <label for="price" style="display: block; margin-bottom: 8px; color: #333;">Precio:</label>
+      <input type="number" id="price" name="price" required style="width: calc(100% - 20px); padding: 10px; margin-bottom: 15px; border: 1px solid #ccc; border-radius: 5px; font-size: 16px;">
+      
+      <label for="category" style="display: block; margin-bottom: 8px; color: #333;">Categoría:</label>
+      <input type="text" id="category" name="category" required style="width: calc(100% - 20px); padding: 10px; margin-bottom: 15px; border: 1px solid #ccc; border-radius: 5px; font-size: 16px;">
+      
+      <label for="stock" style="display: block; margin-bottom: 8px; color: #333;">Stock:</label>
+      <input type="number" id="stock" name="stock" required style="width: calc(100% - 20px); padding: 10px; margin-bottom: 15px; border: 1px solid #ccc; border-radius: 5px; font-size: 16px;">
+      
+      <button type="submit" style="width: 100%; padding: 10px; background-color: #28a745; border: none; border-radius: 5px; color: white; font-size: 16px; cursor: pointer;">Crear</button>
+    </form>
+  </div>
 </body>
 </html>
+
