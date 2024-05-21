@@ -22,18 +22,18 @@
         <tbody>
           <xsl:for-each select="productos/producto">
             <tr>
-              <td><xsl:value-of select="nombre"/></td>
-              <td><xsl:value-of select="precio"/></td>
-              <td><xsl:value-of select="categoria"/></td>
+              <td><xsl:value-of select="name"/></td>
+              <td><xsl:value-of select="price"/></td>
+              <td><xsl:value-of select="category"/></td>
               <td><xsl:value-of select="stock"/></td>
             </tr>
           </xsl:for-each>
         </tbody>
       </table>
       <h2>Total y Porcentaje</h2>
-      <p>Total: <xsl:value-of select="sum(productos/producto/precio)"/></p>
+      <p>Total: <xsl:value-of select="sum(productos/producto/price)"/></p>
       <p>Porcentaje de Categoría A: 
-        <xsl:value-of select="sum(productos/producto[categoria='A']/precio) div sum(productos/producto/precio) * 100"/>%
+        <xsl:value-of select="sum(productos/producto[category='A']/prepricecio) div sum(productos/producto/price) * 100"/>%
       </p>
     </body>
     </html>

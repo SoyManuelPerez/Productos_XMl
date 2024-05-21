@@ -4,54 +4,68 @@ const Product = require('../models/product');
 const xml2js = require('xml2js');
 const fs = require('fs');
 
-// Función para agregar un producto al archivo XML
-const addProductToXML = async (product) => {
+// Función para agregar un producto al archivo XML si no existe
+const addProductToXMLIfNotExists = async (product) => {
   try {
-    // Leer el archivo XML existente
     const xmlData = fs.readFileSync('public/xml/productos.xml', 'utf-8');
-    // Convertir el XML a objeto JavaScript
     const parser = new xml2js.Parser();
     const xmlObject = await parser.parseStringPromise(xmlData);
 
-    // Agregar el nuevo producto al objeto JavaScript
-    xmlObject.productos.producto.push({
-      nombre: product.name,
-      precio: product.price,
-      categoria: product.category,
-      stock: product.stock
-    });
+    if (xmlObject && xmlObject.productos && xmlObject.productos.producto) {
+      const existingProduct = xmlObject.productos.producto.find(p => p.$.id === product._id.toString());
+      if (!existingProduct) {
+        xmlObject.productos.producto.push({
+          $: { id: product._id.toString() },
+          name: product.name,
+          price: product.price,
+          category: product.category,
+          stock: product.stock
+        });
 
-    // Convertir el objeto JavaScript actualizado de nuevo a XML
-    const builder = new xml2js.Builder();
-    const updatedXml = builder.buildObject(xmlObject);
-
-    // Escribir el XML actualizado de vuelta al archivo
-    fs.writeFileSync('public/xml/productos.xml', updatedXml);
+        const builder = new xml2js.Builder();
+        const updatedXml = builder.buildObject(xmlObject);
+        fs.writeFileSync('public/xml/productos.xml', updatedXml);
+        return { success: true, message: 'Producto agregado al XML correctamente.' };
+      } else {
+        console.log(`El producto con ID ${product._id} ya existe en el XML`);
+        return { success: false, message: `El producto con ID ${product._id} ya existe en el XML.` };
+      }
+    } else {
+      console.log('La estructura del XML no es la esperada');
+      return { success: false, message: 'La estructura del XML no es la esperada.' };
+    }
   } catch (error) {
     console.error('Error al agregar el producto al archivo XML:', error);
+    return { success: false, message: 'Error al agregar el producto al archivo XML.' };
   }
 };
 
 // Función para eliminar un producto del archivo XML
 const removeProductFromXML = async (productId) => {
   try {
-    // Leer el archivo XML existente
     const xmlData = fs.readFileSync('public/xml/productos.xml', 'utf-8');
-    // Convertir el XML a objeto JavaScript
     const parser = new xml2js.Parser();
     const xmlObject = await parser.parseStringPromise(xmlData);
 
-    // Encontrar el índice del producto en el objeto JavaScript
-    const index = xmlObject.productos.producto.findIndex(product => product.id === productId);
-    // Eliminar el producto del objeto JavaScript
-    xmlObject.productos.producto.splice(index, 1);
+    if (xmlObject && xmlObject.productos && xmlObject.productos.producto) {
+      const index = xmlObject.productos.producto.findIndex(product => product.$.id === productId);
+      if (index > -1) {
+        xmlObject.productos.producto.splice(index, 1);
 
-    // Convertir el objeto JavaScript actualizado de nuevo a XML
-    const builder = new xml2js.Builder();
-    const updatedXml = builder.buildObject(xmlObject);
+        const builder = new xml2js.Builder();
+        const updatedXml = builder.buildObject(xmlObject);
+        fs.writeFileSync('public/xml/productos.xml', updatedXml);
 
-    // Escribir el XML actualizado de vuelta al archivo
-    fs.writeFileSync('public/xml/productos.xml', updatedXml);
+        if (xmlObject.productos.producto.length === 0) {
+          const emptyXml = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><productos></productos>';
+          fs.writeFileSync('public/xml/productos.xml', emptyXml);
+        }
+      } else {
+        console.log(`Producto con ID ${productId} no encontrado en el XML`);
+      }
+    } else {
+      console.log('El XML no tiene la estructura esperada');
+    }
   } catch (error) {
     console.error('Error al eliminar el producto del archivo XML:', error);
   }
@@ -61,15 +75,36 @@ const removeProductFromXML = async (productId) => {
 router.get('/list', async (req, res) => {
   try {
     const products = await Product.find();
-    // Leer el archivo XML existente
     const xmlData = fs.readFileSync('public/xml/productos.xml', 'utf-8');
-    // Convertir el XML a objeto JavaScript
     const parser = new xml2js.Parser();
     const xmlObject = await parser.parseStringPromise(xmlData);
 
-    // Combina los productos de la base de datos y del archivo XML
-    const allProducts = products.concat(xmlObject.productos.producto);
-    
+    // Crear un mapa para rastrear los productos únicos por ID
+    const productMap = new Map();
+
+    // Agregar productos de la base de datos al mapa
+    products.forEach(product => {
+      productMap.set(product._id.toString(), product);
+    });
+
+    // Agregar productos del XML al mapa (solo si no están ya en el mapa)
+    if (xmlObject.productos && xmlObject.productos.producto) {
+      xmlObject.productos.producto.forEach(product => {
+        if (!productMap.has(product.$.id)) {
+          productMap.set(product.$.id, {
+            _id: product.$.id,
+            name: product.name[0],
+            price: product.price[0],
+            category: product.category[0],
+            stock: product.stock[0]
+          });
+        }
+      });
+    }
+
+    // Convertir el mapa de productos a una lista
+    const allProducts = Array.from(productMap.values());
+
     res.render('list', { products: allProducts });
   } catch (error) {
     console.error('Error al obtener los productos:', error);
@@ -77,19 +112,22 @@ router.get('/list', async (req, res) => {
   }
 });
 
+// Ruta para mostrar el formulario de creación de productos
 router.get('/create', (req, res) => {
-    res.render('create'); // Asumiendo que tienes un archivo de vista llamado 'create.ejs'
-  });
+  res.render('create');
+});
 
 // Ruta para crear un nuevo producto
 router.post('/', async (req, res) => {
   const product = new Product(req.body);
   try {
-    // Guardar el nuevo producto en la base de datos
     await product.save();
-    // Agregar el nuevo producto al archivo XML
-    await addProductToXML(product);
-    res.redirect('/products/list');
+    const xmlResult = await addProductToXMLIfNotExists(product);
+    if (xmlResult.success) {
+      res.redirect('/products/list');
+    } else {
+      res.status(500).send(xmlResult.message);
+    }
   } catch (error) {
     console.error('Error al crear un nuevo producto:', error);
     res.status(500).send('Error al crear un nuevo producto');
@@ -100,9 +138,7 @@ router.post('/', async (req, res) => {
 router.delete('/:id', async (req, res) => {
   const productId = req.params.id;
   try {
-    // Eliminar el producto de la base de datos
     await Product.findByIdAndDelete(productId);
-    // Eliminar el producto del archivo XML
     await removeProductFromXML(productId);
     res.redirect('/products/list');
   } catch (error) {
@@ -110,7 +146,5 @@ router.delete('/:id', async (req, res) => {
     res.status(500).send('Error al eliminar el producto');
   }
 });
-
-// Otras rutas CRUD...
 
 module.exports = router;

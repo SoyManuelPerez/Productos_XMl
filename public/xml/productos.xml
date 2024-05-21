@@ -1,2 +1,15 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<productos/>
+<productos>
+  <producto id="">
+    <name/>
+    <price/>
+    <category/>
+    <stock/>
+  </producto>
+  <producto id="664ccb90221833a57e95c9a7">
+    <name>Camisetas</name>
+    <price>2300</price>
+    <category>Blusas</category>
+    <stock>300</stock>
+  </producto>
+</productos>
