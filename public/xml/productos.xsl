@@ -33,7 +33,7 @@
       <h2>Total y Porcentaje</h2>
       <p>Total: <xsl:value-of select="sum(productos/producto/price)"/></p>
       <p>Porcentaje de Categoría A: 
-        <xsl:value-of select="sum(productos/producto[category='A']/prepricecio) div sum(productos/producto/price) * 100"/>%
+        <xsl:value-of select="sum(productos/producto[category='A']/price) div sum(productos/producto/price) * 100"/>%
       </p>
     </body>
     </html>

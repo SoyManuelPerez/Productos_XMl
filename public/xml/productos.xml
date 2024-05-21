@@ -3,13 +3,25 @@
   <producto>
     <name>Camisetas</name>
     <price>2300</price>
-    <category>Blusas</category>
+    <category>A</category>
     <stock>300</stock>
   </producto>
   <producto>
     <name>Pantalones</name>
     <price>2300</price>
-    <category>Blusas</category>
+    <category>B</category>
     <stock>300</stock>
+  </producto>
+  <producto>
+    <name>Polo</name>
+    <price>2300</price>
+    <category>A</category>
+    <stock>200</stock>
+  </producto>
+  <producto>
+    <name>Pantaloneta</name>
+    <price>2500</price>
+    <category>B</category>
+    <stock>320</stock>
   </producto>
 </productos>
