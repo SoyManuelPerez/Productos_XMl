@@ -24,7 +24,7 @@ router.get('/list', async (req, res) => {
 });
 
 // Obtener el formulario de edición de un producto
-router.put('/:id/edit', async (req, res) => {
+router.get('/:id/edit', async (req, res) => {
   try {
     const product = await Product.findById(req.params.id);
     res.render('update', { product });
@@ -37,6 +37,15 @@ router.put('/:id/edit', async (req, res) => {
 router.delete('/:id', async (req, res) => {
   try {
     await Product.findByIdAndDelete(req.params.id);
+    res.redirect('/products/list');
+  } catch (err) {
+    res.status(500).send(err);
+  }
+});
+// Ruta para actualizar un producto
+router.put('/:id', async (req, res) => {
+  try {
+    await Product.findByIdAndUpdate(req.params.id, req.body);
     res.redirect('/products/list');
   } catch (err) {
     res.status(500).send(err);
