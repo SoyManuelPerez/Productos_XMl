@@ -24,7 +24,7 @@ router.get('/list', async (req, res) => {
 });
 
 // Obtener el formulario de edición de un producto
-router.get('/:id/edit', async (req, res) => {
+router.put('/:id/edit', async (req, res) => {
   try {
     const product = await Product.findById(req.params.id);
     res.render('update', { product });
