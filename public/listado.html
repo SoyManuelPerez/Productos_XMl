@@ -6,22 +6,40 @@
 </head>
 <body>
   <h1>Listado de Productos</h1>
-  <div id="productos"></div>
+  <div id="xmlContainer"></div>
   <script>
-    var xmlhttp = new XMLHttpRequest();
-    xmlhttp.open("GET", "/xml/productos.xml", false);
-    xmlhttp.send();
-    var xmlDoc = xmlhttp.responseXML;
+    document.addEventListener("DOMContentLoaded", function() {
+      // Cargar el XML
+      var xhr = new XMLHttpRequest();
+      xhr.open("GET", "/xml/productos.xml", true);
+      xhr.onreadystatechange = function () {
+        if (xhr.readyState == 4 && xhr.status == 200) {
+          var xml = xhr.responseXML;
 
-    var xsltProcessor = new XSLTProcessor();
-    var xhttp = new XMLHttpRequest();
-    xhttp.open("GET", "/xml/productos.xsl", false);
-    xhttp.send();
-    var xslDoc = xhttp.responseXML;
-    xsltProcessor.importStylesheet(xslDoc);
+          // Cargar el XSL
+          var xslXhr = new XMLHttpRequest();
+          xslXhr.open("GET", "/xml/productos.xsl", true);
+          xslXhr.onreadystatechange = function () {
+            if (xslXhr.readyState == 4 && xslXhr.status == 200) {
+              var xsl = xslXhr.responseXML;
 
-    var resultDocument = xsltProcessor.transformToFragment(xmlDoc, document);
-    document.getElementById("productos").appendChild(resultDocument);
+              // Transformar XML con XSL
+              if (window.ActiveXObject || "ActiveXObject" in window) { // Para IE
+                var ex = xml.transformNode(xsl);
+                document.getElementById("xmlContainer").innerHTML = ex;
+              } else if (document.implementation && document.implementation.createDocument) { // Para otros navegadores
+                var xsltProcessor = new XSLTProcessor();
+                xsltProcessor.importStylesheet(xsl);
+                var resultDocument = xsltProcessor.transformToFragment(xml, document);
+                document.getElementById("xmlContainer").appendChild(resultDocument);
+              }
+            }
+          };
+          xslXhr.send();
+        }
+      };
+      xhr.send();
+    });
   </script>
 </body>
 </html>
